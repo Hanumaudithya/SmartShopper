@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Shopper - Complete Price Comparison</title>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+  />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="icon" href="/static/images/logo1.png" type="image/png">
+</head>
+<body>
+  <!-- Authentication Section -->
+  <div class="auth-container" id="authContainer">
+    <div class="auth-illustration">
+      <div class="auth-logo">
+        <img src="/static/images/logo1.png" alt="Smart Shopper Logo">
+        <span>Smart Shopper</span>
+      </div>
+      <p>Compare prices across multiple platforms and save money on every purchase.</p>
+    </div>
+    <div class="auth-form-container">
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="switchAuthTab('login')">Login</div>
+        <div class="auth-tab" onclick="switchAuthTab('register')">Register</div>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm" class="auth-form" onsubmit="return handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Email or Phone</label>
+          <div class="input-with-icon">
+            <i class="fas fa-user input-icon"></i>
+            <input type="text" name="loginPhoneEmail" class="form-input" placeholder="Enter your email or phone" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="input-with-icon">
+            <i class="fas fa-lock input-icon"></i>
+            <input type="password" name="loginPassword" class="form-input" placeholder="Enter your password" required>
+          </div>
+          <a href="#" class="forgot-password">Forgot Password?</a>
+        </div>
+        <button type="submit" class="btn btn-primary">Sign In</button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="registerForm" class="auth-form" style="display: none;" onsubmit="return handleRegister(event)">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <div class="input-with-icon">
+            <i class="fas fa-user input-icon"></i>
+            <input type="text" name="name" class="form-input" placeholder="Enter your full name" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <div class="input-with-icon">
+            <i class="fas fa-phone input-icon"></i>
+            <input type="tel" name="phone" class="form-input" placeholder="Enter your phone number" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <div class="input-with-icon">
+            <i class="fas fa-envelope input-icon"></i>
+            <input type="email" name="email" class="form-input" placeholder="Enter your email" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="input-with-icon">
+            <i class="fas fa-lock input-icon"></i>
+            <input type="password" name="password" class="form-input" placeholder="Create a strong password" required oninput="checkPasswordStrength(this.value)">
+          </div>
+          <div class="password-strength">
+            <div class="strength-bar" id="strengthBar"></div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Create Account</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Dashboard (hidden until login) -->
+  <div class="dashboard hidden" id="dashboard">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <img src="/static/images/logo1.png" alt="Smart Shopper Logo">
+          <span>Smart Shopper</span>
+        </div>
+        <button class="mobile-menu-toggle" id="closeSidebar">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <ul class="category-list">
+        <li class="category-item active" data-category="all"><i class="fas fa-th-large"></i> All Products</li>
+        <li class="category-item" data-category="groceries"><i class="fas fa-shopping-basket"></i> Groceries</li>
+        <li class="category-item" data-category="dairy"><i class="fas fa-cheese"></i> Dairy</li>
+        <li class="category-item" data-category="snacks"><i class="fas fa-cookie"></i> Snacks</li>
+        <li class="category-item" data-category="fruits"><i class="fas fa-apple-alt"></i> Fruits</li>
+        <li class="category-item" data-category="vegetables"><i class="fas fa-carrot"></i> Vegetables</li>
+        <li class="category-item" data-category="sweets"><i class="fas fa-candy-cane"></i> Sweets</li>
+        <li class="category-item" data-category="skincare"><i class="fas fa-spa"></i> Skin & Face</li>
+      </ul>
+      <div class="sidebar-footer">
+        <button class="btn btn-secondary" onclick="showPantrySection()">
+          <i class="fas fa-box-open"></i> My Pantry
+        </button>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <!-- Header -->
+      <div class="header">
+        <button class="mobile-menu-toggle" id="openSidebar">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="search-bar-container relative">
+          <i class="fas fa-search search-icon"></i>
+          <input
+            type="text"
+            id="searchBar"
+            class="search-bar"
+            placeholder="Search products…"
+          />
+          <!-- Clear button -->
+          <button
+            id="clearSearch"
+            class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-800"
+            title="Clear"
+          >
+            <i class="fas fa-times-circle"></i>
+          </button>
+        </div>
+        <div class="header-buttons">
+          <button class="btn btn-primary" onclick="startScanner()">
+            <i class="fas fa-qrcode"></i><span>Scan</span>
+          </button>
+          <button class="btn btn-primary" onclick="toggleCart()">
+            <i class="fas fa-shopping-cart"></i><span>Cart</span>
+            <span class="cart-count" id="cartCount">0</span>
+          </button>
+          <div class="user-profile" onclick="toggleProfile()">
+            <i class="fas fa-user-circle fa-2x"></i>
+            <div class="profile-dropdown" id="profileDropdown" style="display: none;">
+              <div class="profile-dropdown-item"><i class="fas fa-user"></i><span id="userName">User Name</span></div>
+              <div class="profile-dropdown-item"><i class="fas fa-envelope"></i><span id="userEmail">user@example.com</span></div>
+              <div class="profile-dropdown-item"><i class="fas fa-map-marker-alt"></i><span id="userLocation">Location</span></div>
+              <div class="profile-separator"></div>
+              <div class="profile-dropdown-item"><i class="fas fa-cog"></i><span>Settings</span></div>
+              <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Delivery Options -->
+      <div id="deliveryContainer" class="bg-white py-2 rounded-md shadow-pill mx-4">
+        <div class="flex items-center gap-2 px-4">
+          <h2 class="text-sm text-text">Delivering in</h2>
+        </div>
+        <ul id="deliveryList" class="no-scrollbar flex gap-2 overflow-x-scroll px-4 py-2"></ul>
+      </div>
+
+      <div id="productSection" class="hidden">
+        <div class="section-header flex items-center justify-between mb-4">
+          <h2 class="section-title text-xl font-bold">Featured Products</h2>
+          <div class="view-options flex space-x-2">
+            <button class="view-btn active p-2" onclick="changeView('grid')" title="Grid view">
+              <i class="fas fa-th-large"></i>
+            </button>
+            <button class="view-btn p-2" onclick="changeView('list')" title="List view">
+              <i class="fas fa-list"></i>
+            </button>
+          </div>
+        </div>
+      
+        <!-- responsive grid container -->
+        <div
+          id="productGrid"
+          class="product-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+        ></div>
+      
+        <div class="empty-state hidden text-center mt-8" id="emptyState">
+          <i class="fas fa-search text-4xl mb-2 text-gray-400"></i>
+          <h3 class="text-xl font-semibold">No products found</h3>
+          <p class="text-gray-500">Try adjusting your search or filter to find what you’re looking for.</p>
+        </div>
+      </div>
+      
+
+      <!-- Pantry Manager -->
+      <div class="pantry-section" id="pantrySection" style="display: none;">
+        <div class="section-header">
+          <h2 class="section-title"><i class="fas fa-box-open"></i> My Pantry</h2>
+          <button class="btn btn-secondary" onclick="showProductSection()">
+            <i class="fas fa-arrow-left"></i> Back to Products
+          </button>
+        </div>
+        <div class="add-item-form">
+          <div class="form-group pantry-form-group">
+            <label class="form-label">Item Name</label>
+            <div class="input-with-icon">
+              <i class="fas fa-shopping-basket input-icon"></i>
+              <input type="text" id="itemName" class="form-input" placeholder="Add item to your pantry">
+            </div>
+          </div>
+          <div class="form-group pantry-form-group">
+            <label class="form-label">Expiry Date</label>
+            <div class="input-with-icon">
+              <i class="fas fa-calendar input-icon"></i>
+              <input type="date" id="expiryDate" class="form-input">
+            </div>
+          </div>
+          <div class="form-group pantry-form-group">
+            <label class="form-label">Quantity</label>
+            <div class="input-with-icon">
+              <i class="fas fa-hashtag input-icon"></i>
+              <input type="number" id="itemQuantity" class="form-input" value="1" min="1">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="addPantryItem()"><i class="fas fa-plus"></i> Add Item</button>
+        </div>
+        <div class="section-header mt-8">
+          <h3>My Items</h3>
+          <select class="form-input w-auto" onchange="sortPantry(this.value)">
+            <option value="name">Sort by Name</option>
+            <option value="expiry">Sort by Expiry Date</option>
+          </select>
+        </div>
+        <div id="pantryItems" class="pantry-items"></div>
+        <div class="empty-state hidden" id="emptyPantry">
+          <i class="fas fa-box-open"></i>
+          <h3>Your pantry is empty</h3>
+          <p>Add items to keep track of your groceries and expiry dates.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cart Section -->
+    <div class="cart-section" id="cartSection" style="display: none;">
+      <div class="cart-header">
+        <h2>Your Cart</h2>
+        <button class="cart-close" onclick="toggleCart()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="cart-items" id="cartItems"></div>
+      <div class="empty-state hidden" id="emptyCart">
+        <i class="fas fa-shopping-cart"></i>
+        <h3>Your cart is empty</h3>
+        <p>Add items to your cart to compare and save.</p>
+      </div>
+      <div class="cart-footer">
+        <div class="cart-total">
+          <span>Total Amount:</span>
+          <span class="cart-total-value" id="cartTotal">₹0</span>
+        </div>
+        <button class="checkout-btn" onclick="checkout()">Proceed to Checkout <i class="fas fa-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <!-- Chatbot -->
+    <button id="chatToggleBtn" class="chat-button" onclick="toggleChatbot()">
+      <i class="fas fa-comment-dots"></i>
+    </button>
+    <div class="chatbot-container" id="chatbot" style="display: none;">
+      <div class="chat-header">
+        <div class="chat-title"><i class="fas fa-robot"></i><span>Smart Assistant</span></div>
+        <button class="chat-close" onclick="toggleChatbot()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <div class="message bot-message">Hi there! I'm your Smart Shopping Assistant. How can I help you today?</div>
+      </div>
+      <div class="chat-footer">
+        <div class="chat-input-container">
+          <input type="text" id="userInput" class="chat-input" placeholder="Type your question...">
+          <button id="sendBtn" class="chat-send" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scanner Modal -->
+    <div class="scanner-modal" id="scannerModal" style="display: none;">
+      <div class="scanner-container">
+        <div class="scanner-title"><i class="fas fa-qrcode"></i> Scan Product Barcode</div>
+        <div id="reader"></div>
+        <div class="scanner-footer">
+          <button class="btn btn-secondary" onclick="stopScanner()"><i class="fas fa-times"></i> Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="priceCompareLoader" class="fixed inset-0 hidden flex items-center justify-center bg-white bg-opacity-75 z-50">
+  <div class="flex flex-col items-center">
+    <img
+      id="loaderLogo"
+      src=""
+      alt="Loading…"
+      class="w-24 h-24 object-contain mb-4 animate-pulse"
+    />
+    <div class="w-40 h-1 bg-gray-200 rounded-full overflow-hidden">
+      <div
+        id="loaderBar"
+        class="h-full bg-teal-600 loader-bar-fill"
+        style="animation: progress 3s linear infinite;"
+      ></div>
+    </div>
+  </div>
+</div>
+
+  <!-- Main application logic -->
+  <script src="/static/js/main.js"></script>
+</body>
+</html>
